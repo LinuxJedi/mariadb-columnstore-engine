@@ -31,7 +31,7 @@ cp dbcon/mysql/install_calpont_mysql.sh export/mysql/ && \
 cp dbcon/mysql/my.cnf export/mysql/ && \
 cp dbcon/mysql/mysql-Columnstore export/mysql/
 
-cp -p -r utils/net-snmp export/include
+#cp -p -r utils/net-snmp export/include
 
 #FIXME: 
 # This has to be terribly broken, especially for 32 bit
@@ -54,10 +54,10 @@ cp -p -r utils/net-snmp export/include
 ## 		cp -p utils/net-snmp-built-libs/fc6bin/* export/sbin
 ## 	fi
 ## fi
-d=utils/net-snmp-built-libs/lib64
-for lib in libnetsnmpagent.so libnetsnmphelpers.so libnetsnmpmibs.so libnetsnmp.so libnetsnmptrapd.so; do
-	ln -svf $lib.5.2.1 $d/$lib
-done
+#d=utils/net-snmp-built-libs/lib64
+#for lib in libnetsnmpagent.so libnetsnmphelpers.so libnetsnmpmibs.so libnetsnmp.so libnetsnmptrapd.so; do
+#	ln -svf $lib.5.2.1 $d/$lib
+#done
 
 #FIXME:
 #This is not going to update the version in configure.ac

@@ -159,7 +159,7 @@ AC_SUBST([mysqldir], ['${idbinstall}/mysql'])
 AC_SUBST([mibdir], ['${idbinstall}/share/snmp/mibs'])
 AC_SUBST([toolsdir], ['${idbinstall}/tools'])
 
-AC_SUBST([netsnmp_libs], ['-L${abs_top_builddir}/utils/net-snmp-built-libs/lib64 -lnetsnmpmibs -lnetsnmpagent -lnetsnmp -lnetsnmpmibs -lnetsnmphelpers'])
+AC_SUBST([netsnmp_libs], ['-lnetsnmpmibs -lnetsnmpagent -lnetsnmp -lnetsnmpmibs -lnetsnmphelpers'])
 
 AC_SUBST([idb_common_libs], ['${abs_top_builddir}/utils/messageqcpp/libmessageqcpp.la ${abs_top_builddir}/utils/loggingcpp/libloggingcpp.la ${abs_top_builddir}/utils/configcpp/libconfigcpp.la ${abs_top_builddir}/utils/startup/libidbboot.a ${abs_top_builddir}/utils/boost_idb/libboost_idb.la -lxml2 -lpthread -lrt'])
 AC_SUBST([idb_oam_libs], ['${abs_top_builddir}/oam/oamcpp/liboamcpp.la ${abs_top_builddir}/snmpd/snmpmanager/libsnmpmanager.la ${netsnmp_libs}'])
