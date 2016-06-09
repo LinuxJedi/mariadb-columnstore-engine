@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e
+
+params="$(getopt -o p:i: -l prefix: --name "$cmdname" -- "$@")"
+
+eval set -- "$params"
+unset params
+
+while true
+        do
+        case $1 in
+                --prefix)
+                PREFIX="${2-}"
+                shift 2
+                ;;
+
+                --)
+                shift
+                break
+                ;;
+        esac
+done
+
+if [ ! -w $PREFIX ]; then
+  #user is not root, so check for sudo
+  which sudo > /dev/null
+  if [ $? -eq 0 ]; then
+    #sudo exists, use sudo
+    sudo make install
+  else
+    #sudo does not exist, but try to install anyway
+    echo "PREFIX IS NOT WRITABLE AND sudo IS NOT AVAILABLE, INSTALL WILL LIKELY FAIL"
+    make install
+  fi
+else
+  make install
+fi
