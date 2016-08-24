@@ -575,7 +575,7 @@ bool Row::isNullValue(uint32_t colIndex) const
 				return strings->isNullValue(offset, length);
 			}
 			if (data[offsets[colIndex]] == 0)   // empty string
-				return true;
+				return false;
 			switch (len) {
 				case 1: return (data[offsets[colIndex]] == joblist::CHAR1NULL);
 				case 2: return (*((uint16_t *) &data[offsets[colIndex]]) == joblist::CHAR2NULL);

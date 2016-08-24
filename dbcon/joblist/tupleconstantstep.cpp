@@ -193,7 +193,7 @@ void TupleConstantStep::constructContanstRow(const JobInfo& jobInfo)
 			if (types[*i] == CalpontSystemCatalog::CHAR ||
 				types[*i] == CalpontSystemCatalog::VARCHAR)
 			{
-				fRowConst.setStringField("", *i);
+				fRowConst.setUintField(fRowConst.getNullValue(*i), *i);
 			}
 			else if (isUnsigned(types[*i]))
 			{

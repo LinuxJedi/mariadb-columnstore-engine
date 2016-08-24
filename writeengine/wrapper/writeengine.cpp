@@ -2322,33 +2322,28 @@ timer.stop("allocRowId");
 				
 				for (uint32_t rows = 0; rows < (totalRow - rowsLeft); rows++)
 				{
-					if (dctStr_iter->length() == 0)
-					{
-						Token nullToken;
-						col_iter->data = nullToken;
-					}
-					else
-					{
 #ifdef PROFILE
 timer.start("tokenize");
 #endif
-						DctnryTuple dctTuple;
-						memcpy(dctTuple.sigValue, dctStr_iter->c_str(), dctStr_iter->length());
-						dctTuple.sigSize = dctStr_iter->length();
-						dctTuple.isNull = false;
-						rc = tokenize(txnid,
-							dctTuple,
-							dctnryStructList[i].fCompressionType);
-						if (rc != NO_ERROR)
-						{
-							dctnry->closeDctnry();
-							return rc;
-						}
+                    if (col_iter->data.type() != typeid(Token))
+                    {
+                        DctnryTuple dctTuple;
+                       	memcpy(dctTuple.sigValue, dctStr_iter->c_str(), dctStr_iter->length());
+	    	    		dctTuple.sigSize = dctStr_iter->length();
+		    	    	dctTuple.isNull = false;
+				    	rc = tokenize(txnid,
+					    	dctTuple,
+    						dctnryStructList[i].fCompressionType);
+	    				if (rc != NO_ERROR)
+		    			{
+			    			dctnry->closeDctnry();
+				    		return rc;
+					    }
 #ifdef PROFILE
 timer.stop("tokenize");
 #endif
-						col_iter->data = dctTuple.token;
-					}
+					    col_iter->data = dctTuple.token;
+                    }
 					dctStr_iter++;
 					col_iter++;
 				}
@@ -2392,12 +2387,7 @@ timer.stop("tokenize");
 				
 				for (uint32_t rows = 0; rows < rowsLeft; rows++)
 				{
-					if (dctStr_iter->length() == 0)
-					{
-						Token nullToken;
-						col_iter->data = nullToken;
-					}
-					else
+                    if (col_iter->data.type() != typeid(Token))
 					{
 #ifdef PROFILE
 timer.start("tokenize");

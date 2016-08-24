@@ -1455,15 +1455,42 @@ bool buildConstPredicate(Item_func* ifp, ReturnedColumn* rhs, gp_walk_info* gwip
 	SimpleFilter *sf = new SimpleFilter();
 	boost::shared_ptr<Operator> sop(new PredicateOperator(ifp->func_name()));
 	ConstantColumn *lhs = 0;
+    string value;
+
+    if ((rhs->resultType().colDataType == CalpontSystemCatalog::CHAR ||
+         rhs->resultType().colDataType == CalpontSystemCatalog::VARCHAR ||
+         rhs->resultType().colDataType == CalpontSystemCatalog::VARBINARY ||
+         rhs->resultType().colDataType == CalpontSystemCatalog::BLOB ||
+         rhs->resultType().colDataType == CalpontSystemCatalog::CLOB))
+    {
+         switch (rhs->resultType().colWidth) {
+			case 1:	value = joblist::CHAR1NULL; break;
+			case 2: value.assign((char*)&joblist::CHAR2NULL, 2); break;
+			case 3:
+			case 4: value.assign((char*)&joblist::CHAR4NULL, 4); break;
+			case 5:
+			case 6:
+			case 7:
+			case 8: value.assign((char*)&joblist::CHAR8NULL, 8);
+					break;
+			default:
+				value = joblist::CPNULLSTRMARK;
+				break;
+		}
+    }
+    else
+    {
+        value = "";
+    }
 
 	if (ifp->functype() == Item_func::ISNULL_FUNC)
 	{
-		lhs = new ConstantColumn("", ConstantColumn::NULLDATA);
+		lhs = new ConstantColumn(value, ConstantColumn::NULLDATA);
 		sop.reset(new PredicateOperator("isnull"));
 	}
 	else if (ifp->functype() == Item_func::ISNOTNULL_FUNC)
 	{
-		lhs = new ConstantColumn("", ConstantColumn::NULLDATA);
+		lhs = new ConstantColumn(value, ConstantColumn::NULLDATA);
 		sop.reset(new PredicateOperator("isnotnull"));
 	}
 	else //if (ifp->functype() == Item_func::NOT_FUNC)

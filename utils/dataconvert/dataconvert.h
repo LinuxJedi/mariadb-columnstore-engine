@@ -232,11 +232,11 @@ bool isDateValid ( int day, int month, int year)
     if( month == 2 && isLeapYear( year ) )
         //  29 days in February in a leap year
         daycheck = 29;
-    if ( ( year < 1400 ) || ( year > 9999 ) )
+    if ( ( ( ( year != 0 ) && ( year < 1000 ) )) || ( year > 9999 ) )
         valid = false;
-    else if ( month < 1 || month > 12 )
+    else if ( month < 0 || month > 12 )
         valid = false;
-    else if ( day < 1 || day > daycheck )
+    else if ( day < 0 || day > daycheck )
         valid = false;
     return ( valid );
 }

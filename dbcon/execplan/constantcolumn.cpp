@@ -58,6 +58,13 @@ ConstantColumn::ConstantColumn(const string& sql, TYPE type) :
 		fResult.uintVal = uint64ToStr(*((uint64_t *) tmp));
 		fResult.intVal = (int64_t)fResult.uintVal;
 	}
+    else if ((type == NULLDATA) && sql.length() > 0 && sql.length() < 9)
+    {
+  		memcpy(tmp, sql.c_str(), sql.length());
+		memset(tmp+sql.length(), 0, 8);
+        fResult.uintVal = uint64ToStr(*((uint64_t *) tmp));
+		fResult.intVal = (int64_t)fResult.uintVal;
+    }
 	else
 	{
 		fResult.intVal = atoll(sql.c_str());

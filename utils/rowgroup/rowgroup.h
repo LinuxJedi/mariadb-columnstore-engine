@@ -1481,7 +1481,9 @@ inline const uint8_t * StringStore::getPointer(uint32_t off) const
 
 inline bool StringStore::isNullValue(uint32_t off, uint32_t len) const
 {
-	if (off == std::numeric_limits<uint32_t>::max() || len == 0)
+    if (len == 0)
+        return false;
+	if (off == std::numeric_limits<uint32_t>::max())
 		return true;
 
 	if (len < 8)

@@ -210,166 +210,139 @@ uint8_t WE_DMLCommandProc::processSingleInsert(messageqcpp::ByteStream& bs, std:
 					origVals = columnPtr->get_DataVector();
 					WriteEngine::dictStr dicStrings;
 					// token
-					if ( isDictCol(colType) )
-					{
-						for ( uint32_t i=0; i < origVals.size(); i++ )
-						{
-							tmpStr = origVals[i];
-							if ( tmpStr.length() == 0 )
-								isNULL = true;
-							else
-								isNULL = false;
+                    string x;
+                    for ( uint32_t i=0; i < origVals.size(); i++ )
+                    {
+                        tmpStr = origVals[i];
+                        isNULL = columnPtr->get_isnull();
 
-							if (colType.constraintType == CalpontSystemCatalog::NOTNULL_CONSTRAINT)
-							{
-								if (isNULL && colType.defaultValue.empty()) //error out
-								{
-									Message::Args args;
-									args.add(tableColName.column);
-									err = IDBErrorInfo::instance()->errorMsg(ERR_NOT_NULL_CONSTRAINTS, args);
-									rc = 1;
-									return rc;
-								}
-								else if (isNULL && !(colType.defaultValue.empty()))
-								{
-									tmpStr = colType.defaultValue;
-								}
-							}
-							if ( tmpStr.length() > (unsigned int)colType.colWidth )
-							{
-								tmpStr = tmpStr.substr(0, colType.colWidth);
-								if ( !pushWarning )
-								{
-									pushWarning = true;
-									isWarningSet = true;
-									if ((rc != NO_ERROR) && (rc != dmlpackageprocessor::DMLPackageProcessor::IDBRANGE_WARNING))
-										rc = dmlpackageprocessor::DMLPackageProcessor::IDBRANGE_WARNING;
-										
-									colNames.push_back(tableColName.column);
-								}
-							}
-							WriteEngine::ColTuple colTuple;
-							colTuple.data = datavalue;
 
-							colTuples.push_back(colTuple);
-							//@Bug 2515. Only pass string values to write engine
-							dicStrings.push_back( tmpStr );
-						}
-							colValuesList.push_back(colTuples);
-							//@Bug 2515. Only pass string values to write engine
-							dicStringList.push_back( dicStrings );
-					}
-					else
-					{
-						string x;
-						std::string indata;
-						for ( uint32_t i=0; i < origVals.size(); i++ )
-						{
-							indata = origVals[i];
-							if ( indata.length() == 0 )
-								isNULL = true;
-							else
-								isNULL = false;
+                        //check if autoincrement column and value is 0 or null
+                        uint64_t nextVal = 1;
+                        if (colType.autoincrement)
+                        {
+                            try
+                            {
+                                nextVal = systemCatalogPtr->nextAutoIncrValue(tableName);
+                                fDbrm.startAISequence(oid, nextVal, colType.colWidth, colType.colDataType);
+                            }
+                            catch (std::exception& ex)
+                            {
+                                err = ex.what();
+                                rc = 1;
+                                return rc;
+                            }
+                        }
+                        if (colType.autoincrement && ( isNULL || (tmpStr.compare("0")==0)))
+                        {
+                            try
+                            {
+                                bool reserved = fDbrm.getAIRange(oid, 1, &nextVal);
+                                if (!reserved)
+                                {
+                                    err = IDBErrorInfo::instance()->errorMsg(ERR_EXCEED_LIMIT);
+                                    rc = 1;
+                                    return rc;
+                                }
+                            }
+                            catch (std::exception& ex)
+                            {
+                                err = ex.what();
+                                rc = 1;
+                                return rc;
+                            }
+                            ostringstream oss;
+                            oss << nextVal;
+                            tmpStr = oss.str();
+                            isNULL = false;
+                        }
 
-							//check if autoincrement column and value is 0 or null
-							uint64_t nextVal = 1;
-							if (colType.autoincrement)
-							{
-								try
-								{
-									nextVal = systemCatalogPtr->nextAutoIncrValue(tableName);
-									fDbrm.startAISequence(oid, nextVal, colType.colWidth, colType.colDataType);
-								}
-								catch (std::exception& ex)
-								{
-									err = ex.what();
-									rc = 1;
-									return rc;
-								}
-							}
-							if (colType.autoincrement && ( isNULL || (indata.compare("0")==0)))
-							{
-								try
-								{
-									bool reserved = fDbrm.getAIRange(oid, 1, &nextVal);
-									if (!reserved)
-									{
-										err = IDBErrorInfo::instance()->errorMsg(ERR_EXCEED_LIMIT);
-										rc = 1;
-										return rc;
-									}
-								}
-								catch (std::exception& ex)
-								{
-									err = ex.what();
-									rc = 1;
-									return rc;
-								}
-								ostringstream oss;
-								oss << nextVal;
-								indata = oss.str();
-								isNULL = false;
-							}
+                        if (colType.constraintType == CalpontSystemCatalog::NOTNULL_CONSTRAINT)
+                        {
 
-							if (colType.constraintType == CalpontSystemCatalog::NOTNULL_CONSTRAINT)
-							{
-								if (((colType.colDataType == execplan::CalpontSystemCatalog::DATE) && (indata =="0000-00-00")) ||
-									((colType.colDataType == execplan::CalpontSystemCatalog::DATETIME) && (indata =="0000-00-00 00:00:00")))
-								{
-									isNULL = true;
-								}
-								if (isNULL && colType.defaultValue.empty()) //error out
-								{
-									Message::Args args;
-									args.add(tableColName.column);
-									err = IDBErrorInfo::instance()->errorMsg(ERR_NOT_NULL_CONSTRAINTS, args);
-									rc = 1;
-									return rc;
-								}
-								else if (isNULL && !(colType.defaultValue.empty()))
-								{
-									indata = colType.defaultValue;
-									isNULL = false;
-								}
-							}
+                            if (isNULL && colType.defaultValue.empty()) //error out
+                            {
+                                Message::Args args;
+                                args.add(tableColName.column);
+                                err = IDBErrorInfo::instance()->errorMsg(ERR_NOT_NULL_CONSTRAINTS, args);
+                                rc = 1;
+                                return rc;
+                            }
+                            else if (isNULL && !(colType.defaultValue.empty()))
+                            {
+                                tmpStr = colType.defaultValue;
+                                isNULL = false;
+                            }
+                        }
 
-							try
-							{
-								datavalue = DataConvert::convertColumnData(colType, indata, pushWarning, isNULL);
-							}
-							catch(exception&)
-							{
-								rc = 1;
-								Message::Args args;
-								args.add(string("'") + indata + string("'"));
-								err = IDBErrorInfo::instance()->errorMsg(ERR_NON_NUMERIC_DATA, args);
-							}
-							//@Bug 1806
-							if (rc != NO_ERROR && rc != dmlpackageprocessor::DMLPackageProcessor::IDBRANGE_WARNING)
-							{
-								return rc;
-							}
-							if ( pushWarning) 
-							{
-								if (!isWarningSet)
-									isWarningSet = true;
-								if ( rc != dmlpackageprocessor::DMLPackageProcessor::IDBRANGE_WARNING )
-									rc = dmlpackageprocessor::DMLPackageProcessor::IDBRANGE_WARNING;
-									
-								colNames.push_back(tableColName.column);
-							}
+                        try
+                        {
+                            datavalue = DataConvert::convertColumnData(colType, tmpStr, pushWarning, isNULL);
+                        }
+                        catch(exception&)
+                        {
+                            rc = 1;
+                            Message::Args args;
+                            args.add(string("'") + tmpStr + string("'"));
+                            err = IDBErrorInfo::instance()->errorMsg(ERR_NON_NUMERIC_DATA, args);
+                        }
+                        if (isNULL)
+                        {
+                            std::string charnull;
+                            if (colType.colWidth == 1)
+                            {
+                                //charnull = joblist::CHAR1NULL;
+                                charnull = '\376';
+                                tmpStr = charnull;
+                            }
+                            else if (colType.colWidth == 2)
+                            {
+                                //charnull = joblist::CHAR2NULL;
+                                charnull = "\377\376";
+                                tmpStr = charnull;
+                            }
+                            else if (( colType.colWidth < 5 ) && ( colType.colWidth > 2 ))
+                            {
+                                //charnull = joblist::CHAR4NULL;
+                                charnull = "\377\377\377\376";
+                                tmpStr = charnull;
+                            }
+                            else if (( colType.colWidth < 9 ) && ( colType.colWidth > 4 ))
+                            {
+                                //charnull = joblist::CHAR8NULL;
+                                charnull = "\377\377\377\377\377\377\377\376";
+                                tmpStr = charnull;
+                            }
+                            else
+                            {
+                                tmpStr = joblist::CPNULLSTRMARK;
+                            }
+                        }
 
-							WriteEngine::ColTuple colTuple;
-							colTuple.data = datavalue;
+                        //@Bug 1806
+                        if (rc != NO_ERROR && rc != dmlpackageprocessor::DMLPackageProcessor::IDBRANGE_WARNING)
+                        {
+                            return rc;
+                        }
+                        if ( pushWarning) 
+                        {
+                            if (!isWarningSet)
+                                isWarningSet = true;
+                            if ( rc != dmlpackageprocessor::DMLPackageProcessor::IDBRANGE_WARNING )
+                                rc = dmlpackageprocessor::DMLPackageProcessor::IDBRANGE_WARNING;
+                            colNames.push_back(tableColName.column);
+                        }
 
-							colTuples.push_back(colTuple);
-							//@Bug 2515. Only pass string values to write engine
-							dicStrings.push_back( tmpStr );
-						}
-						colValuesList.push_back(colTuples);
-						dicStringList.push_back( dicStrings );
-					}
-					++row_iterator;
+                        WriteEngine::ColTuple colTuple;
+                        colTuple.data = datavalue;
+
+                        colTuples.push_back(colTuple);
+                        //@Bug 2515. Only pass string values to write engine
+                        dicStrings.push_back( tmpStr );
+                    }
+                    colValuesList.push_back(colTuples);
+					dicStringList.push_back( dicStrings );
+                    ++row_iterator;
 				}
 			}
 		}

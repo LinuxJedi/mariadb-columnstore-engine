@@ -234,8 +234,8 @@ int64_t valueNullNum(const CalpontSystemCatalog::ColType& ct)
 		}
 		else
 		{
-			WriteEngine::Token t = boost::any_cast<WriteEngine::Token>(anyVal);
-			n = *(uint64_t*)&t;
+            const string &i = boost::any_cast<string>(anyVal);
+			n = *((uint64_t*) i.data());
 		}
 		break;
 

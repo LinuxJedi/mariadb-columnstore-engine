@@ -345,7 +345,7 @@ inline bool isNullVal<8>(uint8_t type, const uint8_t* ival)
 	case CalpontSystemCatalog::VARBINARY:
 		//@bug 339 might be a token here
 		//TODO: what's up with the second const here?
-		return (*val == joblist::CHAR8NULL || 0xFFFFFFFFFFFFFFFELL == *val);
+		return (*val == joblist::CHAR8NULL || 0xFFFFFFFFFFFFFFFELL == *val || *val == (*((uint64_t *) joblist::CPNULLSTRMARK.c_str())));
 	case CalpontSystemCatalog::UBIGINT:
 		return (joblist::UBIGINTNULL == *val);
 	default:
@@ -517,7 +517,16 @@ inline bool colCompare(int64_t val1, int64_t val2, uint8_t COP, uint8_t rf, int 
 	else {
 		bool val2Null = isNullVal(width, type, (uint8_t *) &val2);
 		if (isNull == val2Null || (val2Null && COP == COMPARE_NE))
-			return colCompare_(val1, val2, COP, rf);
+        {
+            if (type == CalpontSystemCatalog::CHAR || type == CalpontSystemCatalog::VARCHAR)
+            {
+                return colCompare_(order_swap(val1), order_swap(val2), COP);
+            }
+            else
+            {
+			    return colCompare_(val1, val2, COP, rf);
+            }
+        }
 		else
 			return false;
 	}

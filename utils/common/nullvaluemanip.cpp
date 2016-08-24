@@ -58,8 +58,8 @@ uint64_t getNullValue(CalpontSystemCatalog::ColDataType t, uint32_t colWidth)
 				case 6:
 				case 7:
 				case 8: return joblist::CHAR8NULL;
-				default:
-					throw logic_error("getNullValue() Can't return the NULL string");
+                default:
+					return (*((uint64_t *) joblist::CPNULLSTRMARK.c_str()));
 			}
 			break;
 		}
@@ -129,8 +129,8 @@ int64_t getSignedNullValue(CalpontSystemCatalog::ColDataType t, uint32_t colWidt
 				case 6:
 				case 7:
 				case 8: return joblist::CHAR8NULL;
-				default:
-					throw logic_error("getSignedNullValue() Can't return the NULL string");
+                default:
+					return (*((int64_t *) joblist::CPNULLSTRMARK.c_str()));
 			}
 			break;
 		}

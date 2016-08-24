@@ -342,9 +342,6 @@ void AggregateColumn::evaluate(Row& row, bool& isNull)
 				isNull = true;
 			else
 				fResult.strVal = row.getStringField(fInputIndex);
-			// stringColVal is padded with '\0' to colWidth so can't use str.length()
-			if (strlen(fResult.strVal.c_str()) == 0)
-				isNull = true;
 			break;
 		}
 		if (fResultType.colDataType == CalpontSystemCatalog::STRINT)
