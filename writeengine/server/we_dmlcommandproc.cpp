@@ -272,6 +272,11 @@ uint8_t WE_DMLCommandProc::processSingleInsert(messageqcpp::ByteStream& bs, std:
                                 isNULL = false;
                             }
                         }
+                        // Make empty string a single byte NUL so that the length doesn't trigger conversion to NULL
+                        if (tmpStr.length() == 0)
+                        {
+                            tmpStr = '\0';
+                        }
 
                         try
                         {
@@ -316,7 +321,6 @@ uint8_t WE_DMLCommandProc::processSingleInsert(messageqcpp::ByteStream& bs, std:
                                 tmpStr = joblist::CPNULLSTRMARK;
                             }
                         }
-
                         //@Bug 1806
                         if (rc != NO_ERROR && rc != dmlpackageprocessor::DMLPackageProcessor::IDBRANGE_WARNING)
                         {

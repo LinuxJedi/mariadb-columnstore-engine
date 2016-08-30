@@ -1255,9 +1255,20 @@ int  Dctnry::updateDctnry(unsigned char* sigValue, int& sigSize,
 {
     int rc = NO_ERROR;
     Signature sig;
-    sig.signature = sigValue;
-    sig.size = sigSize;
 
+
+    // NULL string should return null token
+    if (memcmp(sigValue, joblist::CPNULLSTRMARK.c_str(), joblist::CPNULLSTRMARK.length()) == 0)
+    {
+        unsigned char tmpVal[1] = { '\0' };
+        sig.signature = tmpVal;
+        sig.size = 0;
+    }
+    else
+    {
+        sig.signature = sigValue;
+        sig.size = sigSize;
+    }
     // Look for string in cache
     if (m_arraySize < MAX_STRING_CACHE_SIZE)
     {
@@ -1271,7 +1282,7 @@ int  Dctnry::updateDctnry(unsigned char* sigValue, int& sigSize,
     }
 
     //Insert into Dictionary
-    rc = insertDctnry(sigSize, sigValue, token);
+    rc = insertDctnry(sig.size, sig.signature, token);
 
     //Add the new signature and token into cache
     if (m_arraySize < MAX_STRING_CACHE_SIZE)

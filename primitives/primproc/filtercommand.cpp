@@ -502,8 +502,7 @@ bool StrFilterCmd::compare_cc(uint64_t i, uint64_t j)
 
 bool StrFilterCmd::compare_ss(uint64_t i, uint64_t j)
 {
-	if (bpp->fFiltStrValues[0][i] == "" || bpp->fFiltStrValues[1][j] == "" ||
-		bpp->fFiltStrValues[0][i] == joblist::CPNULLSTRMARK || bpp->fFiltStrValues[1][j] == joblist::CPNULLSTRMARK)
+	if (bpp->fFiltStrValues[0][i] == joblist::CPNULLSTRMARK || bpp->fFiltStrValues[1][j] == joblist::CPNULLSTRMARK)
 		return false;
 
 	switch(fBOP)
@@ -536,7 +535,7 @@ bool StrFilterCmd::compare_ss(uint64_t i, uint64_t j)
 bool StrFilterCmd::compare_cs(uint64_t i, uint64_t j)
 {
 	if (execplan::isNull(bpp->fFiltCmdValues[0][i], leftColType) ||
-		bpp->fFiltStrValues[1][j] == "" || bpp->fFiltStrValues[1][j] == joblist::CPNULLSTRMARK)
+		bpp->fFiltStrValues[1][j] == joblist::CPNULLSTRMARK)
 		return false;
 
 	int cmp = strncmp(reinterpret_cast<const char*>(&bpp->fFiltCmdValues[0][i]),
@@ -570,7 +569,7 @@ bool StrFilterCmd::compare_cs(uint64_t i, uint64_t j)
 
 bool StrFilterCmd::compare_sc(uint64_t i, uint64_t j)
 {
-	if (bpp->fFiltStrValues[0][i] == "" || bpp->fFiltStrValues[0][i] == joblist::CPNULLSTRMARK ||
+	if (bpp->fFiltStrValues[0][i] == joblist::CPNULLSTRMARK ||
 		execplan::isNull(bpp->fFiltCmdValues[1][j], rightColType))
 		return false;
 
