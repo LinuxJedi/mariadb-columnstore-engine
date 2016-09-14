@@ -71,6 +71,10 @@ if(NOT AWK_EXECUTABLE)
     message(FATAL_ERROR "awk not found!")
 endif()
 
+INCLUDE (FindJeMalloc)
+if (NOT JEMALLOC_FOUND)
+    message(WARNING "jemalloc not found! Compiling with standard malloc")
+endif()
 
 FOREACH(BUILD_TYPE RELEASE RELWITHDEBINFO MINSIZEREL)
     SET(CMAKE_CXX_FLAGS_${BUILD_TYPE} "-g0 -O3 -fno-strict-aliasing -Wall -fno-tree-vectorize -DDBUG_OFF -DHAVE_CONFIG_H")
@@ -99,7 +103,7 @@ SET (ENGINE_MIBDIR     "${INSTALL_ENGINE}/share/snmp/mibs")
 SET (ENGINE_TOOLSDIR   "${INSTALL_ENGINE}/tools")
 
 SET (ENGINE_NETSNMP_LIBS    "-L${CMAKE_CURRENT_SOURCE_DIR}/net-snmp/net-snmp/snmplib/.libs -L${CMAKE_CURRENT_SOURCE_DIR}/net-snmp/net-snmp/agent/helpers/.libs -L${CMAKE_CURRENT_SOURCE_DIR}/net-snmp/net-snmp/agent/.libs/ -L${CMAKE_CURRENT_SOURCE_DIR}/net-snmp/net-snmp/apps/.libs/ -lnetsnmpmibs -lnetsnmpagent -lnetsnmp -lnetsnmpmibs -lnetsnmphelpers")
-SET (ENGINE_COMMON_LIBS     messageqcpp loggingcpp configcpp idbboot ${Boost_LIBRARIES} xml2 pthread rt)
+SET (ENGINE_COMMON_LIBS     messageqcpp loggingcpp configcpp idbboot ${Boost_LIBRARIES} xml2 pthread rt ${JEMALLOC_LIBRARIES})
 SET (ENGINE_OAM_LIBS        oamcpp snmpmanager ${ENGINE_NETSNMP_LIBS})
 SET (ENGINE_BRM_LIBS        brm idbdatafile cacheutils rwlock ${ENGINE_OAM_LIBS} ${ENGINE_COMMON_LIBS})
 SET (ENGINE_EXEC_LIBS       joblist execplan windowfunction joiner rowgroup funcexp udfsdk dataconvert common compress mysqlcl_idb querystats querytele thrift threadpool ${ENGINE_BRM_LIBS})
@@ -198,6 +202,3 @@ ADD_SUBDIRECTORY(tools)
 ADD_SUBDIRECTORY(writeengine/server)
 ADD_SUBDIRECTORY(writeengine/bulk)
 ADD_SUBDIRECTORY(writeengine/splitter)
-
-INSTALL(FILES utils/jemalloc/libjemalloc.so.3.3.0 DESTINATION ${ENGINE_LIBDIR})
-
