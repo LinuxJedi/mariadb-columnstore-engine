@@ -1082,7 +1082,7 @@ int FileOp::initColumnExtent(
         if ( bOptExtension )
         {
             bOptExtension = (idbdatafile::IDBPolicy::PreallocSpace(dbRoot))
-                ? bOptExtension : false;
+                ? false : bOptExtension;
         }
         // Reduce number of blocks allocated for abbreviated extents thus
         // CS writes less when creates a new table. This couldn't be zero
@@ -1850,7 +1850,7 @@ int FileOp::initDctnryExtent(
         if ( bOptExtension )
         {
             bOptExtension = (idbdatafile::IDBPolicy::PreallocSpace(dbRoot)
-                && m_compressionType) ? bOptExtension : false;
+                && m_compressionType) ? false : bOptExtension;
         }
         // Reduce number of blocks allocated for abbreviated extents thus
         // CS writes less when creates a new table. This couldn't be zero
